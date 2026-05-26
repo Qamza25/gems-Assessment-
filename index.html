@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GEMS – Episode 1 Assessment</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root {
+    --teal:        #1a8a7a;
+    --teal-dark:   #147060;
+    --teal-light:  #20a090;
+    --navy:        #14304d;
+    --navy-dark:   #0e2238;
+    --navy-mid:    #1a3f63;
+    --gold:        #f5a623;
+    --gold-light:  #ffc94d;
+    --white:       #ffffff;
+    --off-white:   #f0faf8;
+    --muted:       #cceee9;
+    --muted-dark:  #7ab8b0;
+    --success:     #00c853;
+    --danger:      #ef5350;
+    --header-blue: #5bb8e8;
+    --border:      rgba(255,255,255,0.22);
+    --card:        rgba(255,255,255,0.13);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--teal);
+    color: var(--white);
+    font-family: 'Source Sans 3', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none; z-index: 0;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    top: -30%; right: -15%;
+    width: 70vw; height: 70vw;
+    background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 65%);
+    pointer-events: none; z-index: 0;
+  }
+
+  .page { position: relative; z-index: 1; }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--header-blue);
+    border-bottom: 2px solid rgba(255,255,255,0.3);
+    padding: 0 40px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+  }
+  .logo-hex {
+    width: 40px; height: 40px;
+    background: var(--navy);
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 12px;
+    color: white; flex-shrink: 0;
+  }
+  .header-text h1 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 19px; font-weight: 700; letter-spacing: 1.5px;
+    color: var(--navy);
+  }
+  .header-text p { font-size: 11px; color: rgba(20,48,77,0.75); }
+  .header-badge {
+    margin-left: auto;
+    background: var(--navy);
+    border-radius: 20px;
+    padding: 4px 16px;
+    font-size: 11px; color: var(--header-blue);
+    font-family: 'Rajdhani', sans-serif; font-weight: 700;
+    letter-spacing: 1px; text-transform: uppercase;
+  }
+
+  /* ── SCREENS ── */
+  .container { max-width: 780px; margin: 0 auto; padding: 48px 24px 80px; }
+  .screen { display: none; animation: fadeUp 0.38s ease both; }
+  .screen.active { display: block; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── CARD ── */
+  .card {
+    background: rgba(255,255,255,0.13);
+    border: 1px solid rgba(255,255,255,0.22);
+    border-radius: 18px;
+    padding: 40px 48px;
+    backdrop-filter: blur(18px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+  }
+
+  .eyebrow {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px; font-weight: 600; letter-spacing: 2.5px;
+    text-transform: uppercase; color: rgba(255,255,255,0.7);
+    margin-bottom: 10px;
+  }
+  .card-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 34px; font-weight: 800; color: var(--white);
+    line-height: 1.1; margin-bottom: 8px;
+  }
+  .card-subtitle { font-size: 15px; color: var(--muted); line-height: 1.6; margin-bottom: 32px; }
+
+  /* ── FORM ── */
+  .form-grid { display: grid; gap: 18px; }
+  .form-group { display: flex; flex-direction: column; gap: 7px; }
+  .form-group label {
+    font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 600;
+    letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted);
+  }
+  .form-group input, .form-group select {
+    background: rgba(255,255,255,0.92);
+    border: 1.5px solid rgba(255,255,255,0.5);
+    border-radius: 9px; padding: 13px 16px;
+    color: var(--navy); font-family: 'Source Sans 3', sans-serif;
+    font-size: 15px; outline: none; transition: all 0.2s;
+  }
+  .form-group input:focus, .form-group select:focus {
+    border-color: var(--navy); box-shadow: 0 0 0 3px rgba(20,48,77,0.18);
+  }
+  .form-group select option { background: white; color: var(--navy); }
+
+  /* ── BUTTONS ── */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+    font-family: 'Rajdhani', sans-serif; font-size: 15px; font-weight: 700;
+    letter-spacing: 1.5px; text-transform: uppercase; border: none;
+    border-radius: 9px; padding: 14px 32px; cursor: pointer; transition: all 0.22s;
+  }
+  .btn-primary { background: var(--navy); color: white; box-shadow: 0 4px 18px rgba(20,48,77,0.32); }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(20,48,77,0.45); background: var(--navy-mid); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .btn-gold { background: linear-gradient(135deg, #e65100, var(--gold)); color: white; box-shadow: 0 4px 18px rgba(245,166,35,0.28); }
+  .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(245,166,35,0.42); }
+  .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--muted); }
+  .btn-outline:hover { border-color: white; color: white; }
+  .btn-teal { background: rgba(255,255,255,0.15); border: 1.5px solid rgba(255,255,255,0.35); color: white; }
+  .btn-teal:hover { background: rgba(255,255,255,0.25); }
+
+  /* ── WELCOME ── */
+  .welcome-hero { text-align: center; padding: 16px 0 32px; }
+  .info-pills {
+    display: flex; gap: 10px; justify-content: center;
+    flex-wrap: wrap; margin-bottom: 32px;
+  }
+  .pill {
+    background: rgba(20,48,77,0.22); border: 1px solid rgba(255,255,255,0.28);
+    border-radius: 20px; padding: 6px 16px; font-size: 13px;
+    color: rgba(255,255,255,0.92);
+  }
+
+  /* ── ATTEMPT LIMIT ── */
+  .limit-box {
+    background: rgba(239,83,80,0.12);
+    border: 1px solid rgba(239,83,80,0.35);
+    border-radius: 12px; padding: 28px 32px; text-align: center;
+  }
+  .limit-box .big-icon { font-size: 48px; margin-bottom: 16px; }
+  .limit-box h3 { font-family: 'Rajdhani', sans-serif; font-size: 24px; font-weight: 700; color: var(--danger); margin-bottom: 8px; }
+  .limit-box p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+  /* ── QUIZ ── */
+  .quiz-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 24px; flex-wrap: wrap; gap: 10px;
+  }
+  .quiz-meta { font-size: 13px; color: var(--muted); }
+  .quiz-meta strong { color: var(--header-blue); }
+  .attempt-badge {
+    background: rgba(20,48,77,0.3); border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 20px; padding: 4px 14px; font-size: 12px;
+    font-family: 'Rajdhani', sans-serif; font-weight: 600; color: var(--muted);
+  }
+
+  .progress-bar-wrap { height: 4px; background: rgba(255,255,255,0.1); border-radius: 4px; margin-bottom: 32px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--navy), var(--gold)); border-radius: 4px; transition: width 0.4s cubic-bezier(.4,0,.2,1); }
+
+  .section-header {
+    font-family: 'Rajdhani', sans-serif; font-size: 11px; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--gold);
+    margin-bottom: 18px; padding-bottom: 10px;
+    border-bottom: 1px solid rgba(245,166,35,0.2);
+  }
+
+  .question-block {
+    margin-bottom: 28px; padding: 22px;
+    background: rgba(255,255,255,0.09);
+    border: 1px solid rgba(255,255,255,0.16);
+    border-radius: 12px; transition: border-color 0.25s;
+  }
+  .question-block.answered { border-color: rgba(255,255,255,0.3); }
+  .question-number { font-family: 'Rajdhani', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: 2px; color: rgba(255,255,255,0.55); text-transform: uppercase; margin-bottom: 9px; }
+  .question-text { font-size: 15px; color: var(--white); line-height: 1.6; margin-bottom: 16px; }
+
+  .options { display: flex; flex-direction: column; gap: 9px; }
+  .option-label {
+    display: flex; align-items: center; gap: 12px;
+    padding: 11px 15px; border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 8px; cursor: pointer; transition: all 0.2s;
+  }
+  .option-label:hover { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.4); }
+  .option-label input[type="radio"] {
+    appearance: none; width: 17px; height: 17px;
+    border: 2px solid rgba(255,255,255,0.45); border-radius: 50%; flex-shrink: 0;
+    transition: all 0.2s; position: relative;
+  }
+  .option-label input[type="radio"]:checked { border-color: white; background: var(--navy); box-shadow: 0 0 0 3px rgba(255,255,255,0.18); }
+  .option-label input[type="radio"]:checked::after { content: ''; position: absolute; inset: 3px; background: white; border-radius: 50%; }
+  .option-label:has(input:checked) { background: rgba(20,48,77,0.28); border-color: rgba(255,255,255,0.48); }
+  .option-letter { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 13px; color: rgba(255,255,255,0.55); min-width: 18px; }
+  .option-text { font-size: 14px; line-height: 1.5; }
+
+  .quiz-nav {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 28px; padding-top: 22px; border-top: 1px solid var(--border);
+    flex-wrap: wrap; gap: 12px;
+  }
+  .unanswered-warning {
+    background: rgba(245,166,35,0.1); border: 1px solid rgba(245,166,35,0.3);
+    border-radius: 8px; padding: 11px 15px; font-size: 13px; color: var(--gold-light);
+    margin-bottom: 14px; display: none;
+  }
+
+  /* ── RESULTS ── */
+  .result-hero { text-align: center; padding: 16px 0 28px; }
+  .score-ring {
+    width: 140px; height: 140px; border-radius: 50%;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    margin: 0 auto 22px; border: 3px solid transparent;
+  }
+  .score-ring.pass { border-color: var(--success); background: radial-gradient(circle, rgba(0,200,83,0.08) 0%, transparent 70%); box-shadow: 0 0 40px rgba(0,200,83,0.2); }
+  .score-ring.fail { border-color: var(--danger); background: radial-gradient(circle, rgba(239,83,80,0.08) 0%, transparent 70%); box-shadow: 0 0 40px rgba(239,83,80,0.2); }
+  .score-pct { font-family: 'Rajdhani', sans-serif; font-size: 48px; font-weight: 700; line-height: 1; }
+  .score-ring.pass .score-pct { color: var(--success); }
+  .score-ring.fail .score-pct { color: var(--danger); }
+  .score-ring-label { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  .result-status { font-family: 'Rajdhani', sans-serif; font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+  .result-msg { font-size: 15px; color: var(--muted); margin-bottom: 28px; line-height: 1.5; }
+
+  .result-breakdown { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-bottom: 28px; }
+  .breakdown-item { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; padding: 16px; text-align: center; }
+  .breakdown-item .num { font-family: 'Rajdhani', sans-serif; font-size: 28px; font-weight: 700; color: white; }
+  .breakdown-item .lbl { font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 3px; }
+
+  .action-buttons { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+
+  .gems-link-box {
+    background: rgba(20,48,77,0.25); border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 12px; padding: 22px; text-align: center;
+  }
+  .gems-link-box p { font-size: 14px; color: rgba(255,255,255,0.7); margin-bottom: 12px; }
+  .gems-link-box a {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--navy); color: white; text-decoration: none;
+    padding: 11px 26px; border-radius: 8px;
+    font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 14px;
+    letter-spacing: 1px; transition: all 0.2s;
+  }
+  .gems-link-box a:hover { transform: translateY(-2px); background: var(--navy-mid); }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed; bottom: 28px; right: 28px;
+    background: var(--teal-dark); border: 1px solid var(--border);
+    border-radius: 10px; padding: 13px 18px; font-size: 14px; color: var(--white);
+    z-index: 9999; transform: translateY(60px); opacity: 0; transition: all 0.3s;
+    max-width: 300px;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.success { border-color: var(--success); }
+  .toast.error { border-color: var(--danger); }
+
+  .spinner {
+    display: inline-block; width: 17px; height: 17px;
+    border: 2px solid rgba(255,255,255,0.2); border-top-color: white;
+    border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 600px) {
+    .card { padding: 26px 20px; }
+    header { padding: 0 20px; }
+    .result-breakdown { grid-template-columns: repeat(3,1fr); gap: 8px; }
+    .card-title { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="logo-hex">GEM</div>
+    <div class="header-text">
+      <h1>GEMS · KNOWLEDGE HUB</h1>
+      <p>Government Employees Medical Scheme</p>
+    </div>
+    <div class="header-badge">Episode 1</div>
+  </header>
+
+  <div class="container">
+
+    <!-- SCREEN 1: WELCOME -->
+    <div class="screen active" id="screen-welcome">
+      <div class="card">
+        <div class="welcome-hero">
+          <div class="eyebrow">Episode 1 Assessment</div>
+          <h2 class="card-title" style="font-size:42px;margin-bottom:20px;">Concepts Clarification Series</h2>
+          <div class="info-pills">
+            <div class="pill">📋 20 Questions</div>
+            <div class="pill">✅ 70% Pass Mark</div>
+            <div class="pill">🔄 Max 3 Attempts</div>
+          </div>
+          <p class="card-subtitle">Test your understanding of the five key concepts covered in Episode 1: Data, Information, Documents, Knowledge, and Records.</p>
+        </div>
+        <button class="btn btn-primary" onclick="showScreen('screen-register')" style="width:100%;padding:15px;font-size:16px;">Begin Assessment →</button>
+      </div>
+    </div>
+
+    <!-- SCREEN 2: REGISTER -->
+    <div class="screen" id="screen-register">
+      <div class="card">
+        <div class="eyebrow">Step 1 of 2</div>
+        <h2 class="card-title">Your Details</h2>
+        <p class="card-subtitle">Please provide your information before starting. Your results will be saved securely.</p>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="reg-name" placeholder="e.g. Lerato Dlamini" autocomplete="name">
+          </div>
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" id="reg-email" placeholder="e.g. lerato@gems.gov.za" autocomplete="email">
+          </div>
+          <div class="form-group">
+            <label>Province</label>
+            <select id="reg-province">
+              <option value="">— Select your province —</option>
+              <option>Eastern Cape</option><option>Free State</option><option>Gauteng</option>
+              <option>KwaZulu-Natal</option><option>Limpopo</option><option>Mpumalanga</option>
+              <option>North West</option><option>Northern Cape</option><option>Western Cape</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex;gap:12px;margin-top:28px;flex-wrap:wrap;">
+          <button class="btn btn-outline" onclick="showScreen('screen-welcome')">← Back</button>
+          <button class="btn btn-primary" onclick="checkAttemptsAndStart()" style="flex:1;">Start Assessment →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN: LIMIT REACHED -->
+    <div class="screen" id="screen-limit">
+      <div class="card">
+        <div class="limit-box">
+          <div class="big-icon">🚫</div>
+          <h3>Maximum Attempts Reached</h3>
+          <p id="limit-msg">You have used all 3 allowed attempts for this assessment. Please speak to your team leader or supervisor for further guidance.</p>
+        </div>
+        <div class="gems-link-box" style="margin-top:24px;">
+          <p>Visit the official GEMS website for more resources.</p>
+          <a href="https://www.gems.gov.za/" target="_blank" rel="noopener">Visit GEMS Website</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN 3: QUIZ -->
+    <div class="screen" id="screen-quiz">
+      <div class="card">
+        <div class="quiz-header">
+          <div>
+            <div class="eyebrow">Assessment in Progress</div>
+            <div id="quiz-user-name" style="font-family:'Rajdhani',sans-serif;font-size:19px;font-weight:700;color:var(--white)"></div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <div class="attempt-badge" id="attempt-badge">Attempt 1 of 3</div>
+            <div class="quiz-meta">Q <strong id="q-current">0</strong>/20</div>
+          </div>
+        </div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+        </div>
+        <div id="quiz-body"></div>
+        <div class="unanswered-warning" id="unanswered-warn"></div>
+        <div class="quiz-nav">
+          <div id="quiz-answered" style="font-size:13px;color:var(--muted)"></div>
+          <button class="btn btn-primary" id="submit-btn" onclick="submitQuiz()">Submit Assessment →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN 4: RESULTS -->
+    <div class="screen" id="screen-results">
+      <div class="card">
+        <div class="result-hero">
+          <div class="score-ring" id="score-ring">
+            <div class="score-pct" id="score-pct">0%</div>
+            <div class="score-ring-label">score</div>
+          </div>
+          <div class="result-status" id="result-status"></div>
+          <div class="result-msg" id="result-msg"></div>
+          <div class="result-breakdown">
+            <div class="breakdown-item"><div class="num" id="res-correct">0</div><div class="lbl">Correct</div></div>
+            <div class="breakdown-item"><div class="num" id="res-wrong">0</div><div class="lbl">Incorrect</div></div>
+            <div class="breakdown-item"><div class="num" id="res-pct">0%</div><div class="lbl">Score</div></div>
+          </div>
+
+          <div id="retry-section" style="display:none;margin-bottom:16px;">
+            <div style="background:rgba(239,83,80,.09);border:1px solid rgba(239,83,80,.28);border-radius:12px;padding:18px 20px;margin-bottom:16px;">
+              <div style="font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;color:var(--danger);margin-bottom:6px;">Below Pass Mark</div>
+              <p id="retry-msg" style="font-size:13px;color:var(--muted);line-height:1.6;"></p>
+            </div>
+            <button class="btn btn-gold" id="retry-btn" onclick="retryQuiz()" style="width:100%;">Retry Assessment →</button>
+          </div>
+
+          <div class="action-buttons">
+            <button onclick="downloadPDF()" class="btn btn-teal" style="width:100%;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download Results as PDF
+            </button>
+          </div>
+        </div>
+        <div class="gems-link-box">
+          <p>Visit the official GEMS website for more resources and information.</p>
+          <a href="https://www.gems.gov.za/" target="_blank" rel="noopener">Visit GEMS Website →</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL  = 'https://lgbksliquaakgwbsjule.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_RE60s3HAfDcv2vwILEcGxw_NQqh_ydn';
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const MAX_ATTEMPTS = 3;
+const PASS_MARK = 70;
+
+const questions = [
+  { section:'Section A — Multiple Choice', num:1, text:'What is the main purpose of the GEMS Concepts Clarification Series?', options:['To teach employees how to use new software','To clarify key concepts so teams share a common understanding','To explain GEMS member benefits','To train employees on customer service'], correct:1 },
+  { section:'Section A — Multiple Choice', num:2, text:'Which five key concepts are explored in Episode 1?', options:['Claims, Benefits, Payments, Members, Providers','Data, Information, Documents, Knowledge, and Records','Policies, Procedures, Meetings, Minutes, Reports','Systems, Platforms, Users, Files, Emails'], correct:1 },
+  { section:'Section A — Multiple Choice', num:3, text:'What is data?', options:['Final approved evidence of a decision','Raw values captured according to specific rules and attributes','A completed report ready for approval','Lessons learned from past experiences'], correct:1 },
+  { section:'Section A — Multiple Choice', num:4, text:'Which of the following is given as an example of data at GEMS?', options:['Approved Board meeting minutes',"A member's date of birth",'A finalised policy document','A team checklist'], correct:1 },
+  { section:'Section A — Multiple Choice', num:5, text:'When does data become information?', options:['When it is deleted from a system','When it is processed, structured, and contextualised','When it is printed','When it is stored in a folder'], correct:1 },
+  { section:'Section A — Multiple Choice', num:6, text:'What is an example of information in the video?', options:['Grouping claim line amounts by month and plan option',"A member's date of birth on its own",'An unsigned provider contract template','A blank document'], correct:0 },
+  { section:'Section A — Multiple Choice', num:7, text:'What is a document?', options:['An editable file that supports collaboration and refinement','A final and unchangeable proof of a transaction','A raw value captured in a system',"A person's experience and understanding"], correct:0 },
+  { section:'Section A — Multiple Choice', num:8, text:'What example of a document is used in the video?', options:["A member's date of birth",'Approved Board meeting minutes','A provider contract template','A completed transaction record'], correct:2 },
+  { section:'Section A — Multiple Choice', num:9, text:'What is a record?', options:['A draft file that is still being edited','The final and authoritative proof of a decision or transaction','A raw data point','A question asked during reporting'], correct:1 },
+  { section:'Section A — Multiple Choice', num:10, text:'What is knowledge?', options:['Raw values captured by a system','Insights, experience, and understanding used to solve problems and make decisions','An editable template','A completed transaction only'], correct:1 },
+  { section:'Section B — True or False', num:11, text:'Data on its own always conveys full meaning.', options:['True','False'], correct:1 },
+  { section:'Section B — True or False', num:12, text:'A document can hold data, information, or both.', options:['True','False'], correct:0 },
+  { section:'Section B — True or False', num:13, text:'A record must remain authentic, reliable, and retrievable for as long as required.', options:['True','False'], correct:0 },
+  { section:'Section B — True or False', num:14, text:'Knowledge can only exist in written documents.', options:['True','False'], correct:1 },
+  { section:'Section B — True or False', num:15, text:'Understanding the differences between data, information, documents, knowledge, and records helps teams choose the right next step and find the right support.', options:['True','False'], correct:0 },
+  { section:'Section C — Scenario-Based Questions', num:16, text:"A GEMS team captures a member's date of birth in the system. What is this an example of?", options:['Data','Information','Knowledge','Record'], correct:0 },
+  { section:'Section C — Scenario-Based Questions', num:17, text:'A team groups claim line amounts by month and plan option to identify patterns and trends. What has the data become?', options:['A record','Information','A raw value','Tacit knowledge'], correct:1 },
+  { section:'Section C — Scenario-Based Questions', num:18, text:'A provider contract template is being reviewed and adjusted by different teams before approval. What is it?', options:['Data','Document','Record','Knowledge'], correct:1 },
+  { section:'Section C — Scenario-Based Questions', num:19, text:'Board meeting minutes have been approved and stored in the Records Centre repositories as evidence of what was discussed and decided. What are they?', options:['Data','Information','Document','Record'], correct:3 },
+  { section:'Section C — Scenario-Based Questions', num:20, text:'A team develops a checklist based on lessons learned from previous work so others can follow the same guidance. What is this an example of?', options:['Knowledge asset','Raw data','Transaction record','Unprocessed information'], correct:0 },
+];
+
+const letters = ['A','B','C','D'];
+let userAnswers = new Array(20).fill(null);
+let userData = {};
+let attempt = 1;
+let totalPriorAttempts = 0;
+let lastScore = 0;
+let lastCorrect = 0;
+let lastPassed = false;
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function checkAttemptsAndStart() {
+  const name     = document.getElementById('reg-name').value.trim();
+  const email    = document.getElementById('reg-email').value.trim();
+  const province = document.getElementById('reg-province').value;
+  if (!name || !email || !province) { showToast('⚠️ Please fill in all fields.', 'error'); return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast('⚠️ Please enter a valid email.', 'error'); return; }
+
+  userData = { name, email, province };
+
+  try {
+    const { data, error } = await db.from('quiz_results').select('id, attempt_number, passed').eq('email', email).order('attempt_number', { ascending: false });
+    if (error) throw error;
+    totalPriorAttempts = data ? data.length : 0;
+    if (totalPriorAttempts >= MAX_ATTEMPTS) {
+      document.getElementById('limit-msg').textContent = `${name}, you have used all ${MAX_ATTEMPTS} allowed attempts for this assessment. Please speak to your team leader or supervisor for further guidance.`;
+      showScreen('screen-limit');
+      return;
+    }
+    attempt = totalPriorAttempts + 1;
+  } catch(e) {
+    attempt = 1;
+  }
+
+  userAnswers = new Array(20).fill(null);
+  buildQuiz();
+  document.getElementById('quiz-user-name').textContent = name;
+  document.getElementById('attempt-badge').textContent = `Attempt ${attempt} of ${MAX_ATTEMPTS}`;
+  showScreen('screen-quiz');
+}
+
+function buildQuiz() {
+  const body = document.getElementById('quiz-body');
+  let html = '', lastSection = '';
+  questions.forEach((q, i) => {
+    if (q.section !== lastSection) {
+      html += `<div class="section-header">${q.section}</div>`;
+      lastSection = q.section;
+    }
+    html += `<div class="question-block" id="qblock-${i}">
+      <div class="question-number">Question ${q.num} of 20</div>
+      <div class="question-text">${q.text}</div>
+      <div class="options">
+        ${q.options.map((opt, j) => `
+          <label class="option-label" id="opt-${i}-${j}">
+            <input type="radio" name="q${i}" value="${j}" onchange="onAnswer(${i},${j})">
+            <span class="option-letter">${letters[j]}</span>
+            <span class="option-text">${opt}</span>
+          </label>`).join('')}
+      </div>
+    </div>`;
+  });
+  body.innerHTML = html;
+  updateProgress();
+}
+
+function onAnswer(qi, val) {
+  userAnswers[qi] = val;
+  document.getElementById('qblock-' + qi).classList.add('answered');
+  updateProgress();
+}
+
+function updateProgress() {
+  const answered = userAnswers.filter(a => a !== null).length;
+  document.getElementById('progress-fill').style.width = (answered / 20 * 100) + '%';
+  document.getElementById('q-current').textContent = answered;
+  document.getElementById('quiz-answered').textContent = `${answered} of 20 answered`;
+}
+
+async function submitQuiz() {
+  const unanswered = userAnswers.filter(a => a === null).length;
+  if (unanswered > 0) {
+    const w = document.getElementById('unanswered-warn');
+    w.style.display = 'block';
+    w.textContent = `⚠️ ${unanswered} question(s) unanswered. Please answer all before submitting.`;
+    document.getElementById('qblock-' + userAnswers.indexOf(null)).scrollIntoView({ behavior:'smooth', block:'center' });
+    return;
+  }
+  document.getElementById('unanswered-warn').style.display = 'none';
+  const btn = document.getElementById('submit-btn');
+  btn.innerHTML = '<div class="spinner"></div> Submitting…'; btn.disabled = true;
+
+  const correct = questions.filter((q, i) => userAnswers[i] === q.correct).length;
+  const score   = Math.round((correct / 20) * 100);
+  const passed  = score >= PASS_MARK;
+  lastScore = score; lastCorrect = correct; lastPassed = passed;
+
+  try {
+    await db.from('quiz_results').insert([{
+      name: userData.name, email: userData.email, province: userData.province,
+      score, correct_answers: correct, total_questions: 20,
+      passed, attempt_number: attempt, answers: JSON.stringify(userAnswers),
+      taken_at: new Date().toISOString()
+    }]);
+  } catch(e) { console.error('Save error:', e); }
+
+  showResults(score, correct, passed);
+  btn.innerHTML = 'Submit Assessment →'; btn.disabled = false;
+}
+
+function showResults(score, correct, passed) {
+  const ring = document.getElementById('score-ring');
+  ring.className = 'score-ring ' + (passed ? 'pass' : 'fail');
+  document.getElementById('score-pct').textContent = score + '%';
+  document.getElementById('res-correct').textContent = correct;
+  document.getElementById('res-wrong').textContent = 20 - correct;
+  document.getElementById('res-pct').textContent = score + '%';
+
+  const statusEl = document.getElementById('result-status');
+  const msgEl    = document.getElementById('result-msg');
+  const retryEl  = document.getElementById('retry-section');
+  const retryMsg = document.getElementById('retry-msg');
+  const retryBtn = document.getElementById('retry-btn');
+
+  if (passed) {
+    statusEl.textContent = 'Congratulations! 🎉';
+    statusEl.style.color = 'var(--success)';
+    msgEl.textContent = `Well done, ${userData.name}! You passed with ${score}%.`;
+    retryEl.style.display = 'none';
+  } else {
+    statusEl.style.color = 'var(--danger)';
+    const attemptsLeft = MAX_ATTEMPTS - attempt;
+    if (attemptsLeft > 0) {
+      statusEl.textContent = 'Not Quite There Yet';
+      msgEl.textContent = `You scored ${score}%, ${userData.name}. The pass mark is ${PASS_MARK}%.`;
+      retryMsg.textContent = `You have ${attemptsLeft} attempt${attemptsLeft > 1 ? 's' : ''} remaining. Review the Episode 1 material before retrying.`;
+      retryBtn.textContent = `Retry Assessment (${attemptsLeft} left) →`;
+      retryEl.style.display = 'block';
+    } else {
+      statusEl.textContent = 'Maximum Attempts Reached';
+      msgEl.textContent = `You scored ${score}% on your final attempt. Please speak to your team leader for guidance.`;
+      retryEl.style.display = 'none';
+    }
+  }
+  showScreen('screen-results');
+}
+
+function retryQuiz() {
+  attempt++;
+  userAnswers = new Array(20).fill(null);
+  buildQuiz();
+  document.getElementById('unanswered-warn').style.display = 'none';
+  document.getElementById('attempt-badge').textContent = `Attempt ${attempt} of ${MAX_ATTEMPTS}`;
+  showScreen('screen-quiz');
+}
+
+function downloadPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit:'mm', format:'a4' });
+  const W = 210, H = 297, M = 14; // page width, height, margin
+  const INNER = W - M * 2;        // printable width
+
+  const score = lastScore, correct = lastCorrect, passed = lastPassed;
+  const dateStr = new Date().toLocaleDateString('en-ZA', { day:'2-digit', month:'long', year:'numeric' });
+
+  // ─── COLOUR PALETTE ───
+  const C = {
+    teal:    [26,138,122],
+    tealDk:  [20,100,88],
+    navy:    [20,48,77],
+    blue:    [91,184,232],
+    white:   [255,255,255],
+    offWh:   [245,250,249],
+    muted:   [110,150,145],
+    success: [0,170,80],
+    danger:  [210,60,55],
+    border:  [210,230,228],
+    textDk:  [30,50,70],
+    textMd:  [80,110,120],
+  };
+
+  // ─── HELPERS ───
+  let curY = 0;
+  let pageNum = 1;
+
+  function setFill(c)   { doc.setFillColor(...c); }
+  function setStroke(c) { doc.setDrawColor(...c); }
+  function setTxt(c)    { doc.setTextColor(...c); }
+
+  // Draw page header strip (teal top bar) — used on every page
+  function drawPageHeader() {
+    // White background for whole page
+    setFill(C.white); doc.rect(0,0,W,H,'F');
+    // Teal header band
+    setFill(C.blue); doc.rect(0,0,W,28,'F');
+    setTxt(C.navy); doc.setFontSize(13); doc.setFont('helvetica','bold');
+    doc.text('GEMS · KNOWLEDGE HUB', M, 11);
+    setTxt(C.navy); doc.setFontSize(7.5); doc.setFont('helvetica','normal');
+    doc.text('Government Employees Medical Scheme  ·  Episode 1 Assessment Results', M, 18);
+    // Right: page indicator
+    setTxt(C.navy); doc.setFontSize(8); doc.setFont('helvetica','bold');
+    doc.text(`${userData.name||''}`, W-M, 11, { align:'right' });
+    doc.setFont('helvetica','normal');
+    doc.text(`Score: ${score}%  |  ${passed?'PASSED':'NOT PASSED'}`, W-M, 18, { align:'right' });
+    // Bottom rule
+    setStroke(C.teal); doc.setLineWidth(0.5); doc.line(M,28,W-M,28);
+    curY = 35;
+  }
+
+  function drawPageFooter() {
+    const fy = H - 10;
+    setStroke(C.border); doc.setLineWidth(0.3); doc.line(M, fy-4, W-M, fy-4);
+    setTxt(C.muted); doc.setFontSize(7); doc.setFont('helvetica','normal');
+    doc.text('GEMS Concepts Clarification Series — Episode 1  |  www.gems.gov.za', M, fy);
+    doc.text('Page ' + pageNum, W-M, fy, { align:'right' });
+  }
+
+  function addPageIfNeeded(spaceNeeded) {
+    if (curY + spaceNeeded > H - 16) {
+      drawPageFooter();
+      doc.addPage();
+      pageNum++;
+      drawPageHeader();
+    }
+  }
+
+  // Wrap text to fit within maxW, return array of lines
+  function splitText(text, fontSize, maxW) {
+    doc.setFontSize(fontSize);
+    return doc.splitTextToSize(text, maxW);
+  }
+
+  // ═══════════════════════════════════
+  // PAGE 1 — COVER / SUMMARY
+  // ═══════════════════════════════════
+  drawPageHeader();
+
+  // ── Title block ──
+  setTxt(C.textDk); doc.setFontSize(18); doc.setFont('helvetica','bold');
+  doc.text('Assessment Results', M, curY);
+  curY += 5;
+  setTxt(C.muted); doc.setFontSize(8); doc.setFont('helvetica','normal');
+  doc.text('Concepts Clarification Series — Episode 1', M, curY);
+  curY += 10;
+
+  // ── Participant info card ──
+  setFill(C.offWh); setStroke(C.border); doc.setLineWidth(0.4);
+  doc.roundedRect(M, curY, INNER, 32, 3, 3, 'FD');
+
+  const col1=M+6, col2=M+70, col3=M+130;
+  setTxt(C.muted); doc.setFontSize(7); doc.setFont('helvetica','bold');
+  doc.text('PARTICIPANT', col1, curY+9);
+  doc.text('EMAIL ADDRESS', col2, curY+9);
+  doc.text('PROVINCE', col3, curY+9);
+  setTxt(C.textDk); doc.setFontSize(10); doc.setFont('helvetica','bold');
+  doc.text(userData.name||'—', col1, curY+17);
+  doc.setFontSize(8.5); doc.setFont('helvetica','normal');
+  // truncate email if long
+  const emailStr = (userData.email||'—').length > 28 ? (userData.email||'').slice(0,26)+'…' : (userData.email||'—');
+  doc.text(emailStr, col2, curY+17);
+  doc.text(userData.province||'—', col3, curY+17);
+  setTxt(C.muted); doc.setFontSize(7); doc.setFont('helvetica','bold');
+  doc.text('DATE TAKEN', col1, curY+25);
+  doc.text('ATTEMPT', col2, curY+25);
+  setTxt(C.textDk); doc.setFontSize(8.5); doc.setFont('helvetica','normal');
+  doc.text(dateStr, col1, curY+31);
+  doc.text('Attempt ' + attempt + ' of ' + MAX_ATTEMPTS, col2, curY+31);
+  curY += 40;
+
+  // ── Score summary row ──
+  const boxW = (INNER - 6) / 3;
+  const boxes = [
+    { label:'CORRECT ANSWERS', val: correct + ' / 20',   col: C.success },
+    { label:'INCORRECT ANSWERS', val: (20-correct) + ' / 20', col: C.danger  },
+    { label:'FINAL SCORE',      val: score + '%',         col: passed ? C.success : C.danger },
+  ];
+  boxes.forEach((b, i) => {
+    const bx = M + i * (boxW + 3);
+    setFill(C.offWh); setStroke(C.border); doc.setLineWidth(0.3);
+    doc.roundedRect(bx, curY, boxW, 22, 3, 3, 'FD');
+    setTxt(b.col); doc.setFontSize(15); doc.setFont('helvetica','bold');
+    doc.text(b.val, bx + boxW/2, curY+12, { align:'center' });
+    setTxt(C.muted); doc.setFontSize(6.5); doc.setFont('helvetica','normal');
+    doc.text(b.label, bx + boxW/2, curY+19, { align:'center' });
+  });
+  curY += 28;
+
+  // ── Pass/fail banner ──
+  setFill(passed ? [230,248,238] : [253,232,232]);
+  setStroke(passed ? C.success : C.danger);
+  doc.setLineWidth(0.5);
+  doc.roundedRect(M, curY, INNER, 14, 3, 3, 'FD');
+  setTxt(passed ? C.success : C.danger);
+  doc.setFontSize(10); doc.setFont('helvetica','bold');
+  const bannerTxt = passed
+    ? '✓  Congratulations! You met the required 70% pass mark.'
+    : '✗  Below Pass Mark — A score of 70% or higher is required to pass.';
+  doc.text(bannerTxt, W/2, curY+9, { align:'center' });
+  curY += 20;
+
+  // ── Divider before question review ──
+  setTxt(C.textDk); doc.setFontSize(11); doc.setFont('helvetica','bold');
+  doc.text('Question Review', M, curY);
+  curY += 4;
+  setTxt(C.muted); doc.setFontSize(8); doc.setFont('helvetica','normal');
+  doc.text('All 20 questions with your answers and the correct answers are shown below.', M, curY);
+  curY += 7;
+  setStroke(C.border); doc.setLineWidth(0.4); doc.line(M, curY, W-M, curY);
+  curY += 6;
+
+  // ═══════════════════════════════════
+  // QUESTION REVIEW — ALL 20 QUESTIONS
+  // ═══════════════════════════════════
+  let lastSection = '';
+
+  questions.forEach((q, i) => {
+    const isOk = userAnswers[i] === q.correct;
+    const userAnswer = userAnswers[i] !== null ? q.options[userAnswers[i]] : '— not answered —';
+    const correctAnswer = q.options[q.correct];
+
+    // Section header
+    if (q.section !== lastSection) {
+      addPageIfNeeded(14);
+      setFill(C.teal); doc.rect(M, curY, INNER, 9, 'F');
+      setTxt(C.white); doc.setFontSize(8); doc.setFont('helvetica','bold');
+      doc.text(q.section.toUpperCase(), M+5, curY+6);
+      curY += 14;
+      lastSection = q.section;
+    }
+
+    // Estimate block height: question text lines + answer lines + padding
+    const qLines = splitText(q.text, 9, INNER - 30);
+    const uaLines = splitText(userAnswer, 8, INNER - 40);
+    const caLines = splitText(correctAnswer, 8, INNER - 40);
+    const blockH = 8 + qLines.length * 4.5 + 6 + uaLines.length * 4.2 + (isOk ? 0 : caLines.length * 4.2 + 4) + 8;
+
+    addPageIfNeeded(blockH);
+
+    // Question block background
+    const bgCol = isOk ? [240,252,245] : [255,240,240];
+    const bdCol = isOk ? C.success : C.danger;
+    setFill(bgCol); setStroke(bdCol); doc.setLineWidth(0.4);
+    doc.roundedRect(M, curY, INNER, blockH, 2, 2, 'FD');
+
+    // Left status bar
+    setFill(bdCol); doc.rect(M, curY, 3, blockH, 'F');
+
+    let qy = curY + 7;
+
+    // Q number + result badge
+    setTxt(C.muted); doc.setFontSize(7.5); doc.setFont('helvetica','bold');
+    doc.text('Q' + (i+1), M+7, qy);
+    // Result pill
+    const pillTxt = isOk ? 'CORRECT' : 'INCORRECT';
+    const pillCol = isOk ? C.success : C.danger;
+    const pillBg  = isOk ? [220,248,233] : [252,220,218];
+    setFill(pillBg); doc.setLineWidth(0); doc.roundedRect(M+16, qy-4.5, 20, 6, 2, 2, 'F');
+    setTxt(pillCol); doc.setFontSize(6.5); doc.setFont('helvetica','bold');
+    doc.text(pillTxt, M+26, qy, { align:'center' });
+
+    qy += 5;
+
+    // Question text
+    setTxt(C.textDk); doc.setFontSize(9); doc.setFont('helvetica','bold');
+    const qWrapped = splitText(q.text, 9, INNER - 14);
+    doc.text(qWrapped, M+7, qy);
+    qy += qWrapped.length * 4.5 + 3;
+
+    // User's answer
+    setTxt(C.muted); doc.setFontSize(7); doc.setFont('helvetica','bold');
+    doc.text('YOUR ANSWER:', M+7, qy);
+    qy += 4;
+    setTxt(isOk ? C.success : C.danger); doc.setFontSize(8); doc.setFont('helvetica','normal');
+    const uaWrapped = splitText((isOk ? '✓ ' : '✗ ') + userAnswer, 8, INNER - 20);
+    doc.text(uaWrapped, M+7, qy);
+    qy += uaWrapped.length * 4.2 + 2;
+
+    // Correct answer (only if wrong)
+    if (!isOk) {
+      setTxt(C.muted); doc.setFontSize(7); doc.setFont('helvetica','bold');
+      doc.text('CORRECT ANSWER:', M+7, qy);
+      qy += 4;
+      setTxt(C.success); doc.setFontSize(8); doc.setFont('helvetica','normal');
+      const caWrapped = splitText('✓ ' + correctAnswer, 8, INNER - 20);
+      doc.text(caWrapped, M+7, qy);
+    }
+
+    curY += blockH + 4;
+  });
+
+  // ── Final footer on last page ──
+  drawPageFooter();
+
+  doc.save(`GEMS_Results_${(userData.name||'User').replace(/\s+/g,'_')}_${new Date().toISOString().slice(0,10)}.pdf`);
+  showToast('✅ PDF downloaded — ' + doc.getNumberOfPages() + ' pages', 'success');
+}
+
+function showToast(msg, type='info') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast show ' + type;
+  setTimeout(()=>t.classList.remove('show'), 3500);
+}
+</script>
+</body>
+</html>
