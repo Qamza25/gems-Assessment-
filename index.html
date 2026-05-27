@@ -10,7 +10,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
   :root {
-    --teal:        #0a443b;
+    --teal:        #097767;
     --teal-dark:   #147060;
     --teal-light:  #20a090;
     --navy:        #14304d;
@@ -80,10 +80,10 @@
   }
   .header-text h1 {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    font-size: 19px; font-weight: 700; letter-spacing: 1.5px;
-    color: var(--navy);
+    font-size: 19px; font-weight: 900; letter-spacing: 1.5px;
+    color: #ffffff;
   }
-  .header-text p { font-size: 11px; color: rgba(20,48,77,0.75); }
+  .header-text p { font-size: 11px; color: rgba(241, 243, 245, 0.87); }
   .header-badge {
     margin-left: auto;
     background: var(--navy);
@@ -191,8 +191,8 @@
   }
 
   .quiz-inprogress-label {
-    font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
-    color: var(--navy); margin-bottom: 4px;
+    font-size: 11px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase;
+    color: #ffffff; margin-bottom: 4px;
   }
   #quiz-user-name {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -373,6 +373,15 @@
     .card-title { font-size: 26px; }
     .breakdown-item .num { font-size: 26px; }
   }
+  @media (max-width: 640px) {
+    .header-text h1 {
+        font-size: 13px;
+        letter-spacing: 0.5px;
+    }
+    .header-badge {
+        display: none;
+    }
+}
 </style>
 </head>
 <body>
@@ -381,7 +390,7 @@
     <div class="logo-hex">GEM</div>
     <div class="header-text">
       <h1>GEMS – Concept Clarification Series</h1>
-      <p>Government Employees Medical Scheme</p>
+      
     </div>
     <div class="header-badge">Episode 1</div>
   </header>
