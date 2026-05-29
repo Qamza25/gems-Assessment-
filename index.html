@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -37,6 +36,8 @@
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     min-height: 100vh;
     overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
   }
 
   body::before {
@@ -57,7 +58,7 @@
     pointer-events: none; z-index: 0;
   }
 
-  .page { position: relative; z-index: 1; }
+  .page { position: relative; z-index: 1; flex: 1; }
 
   header {
     background: var(--header-blue);
@@ -70,18 +71,18 @@
     position: sticky; top: 0; z-index: 100;
     box-shadow: 0 4px 20px rgba(0,0,0,0.12);
   }
-  .logo-hex {
-    width: 40px; height: 40px;
-    background: var(--navy);
-    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 700; font-size: 12px;
-    color: white; flex-shrink: 0;
+
+  .logo-img {
+    height: 40px;
+    width: auto;
+    flex-shrink: 0;
+    object-fit: contain;
   }
+
   .header-text h1 {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: 19px; font-weight: 900; letter-spacing: 1.5px;
-    color: #ffffff;
+    color: var(--navy);
   }
   .header-text p { font-size: 11px; color: rgba(241, 243, 245, 0.87); }
   .header-badge {
@@ -196,7 +197,7 @@
   }
   #quiz-user-name {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    font-size: 19px; font-weight: 700; color: var(--navy);
+    font-size: 19px; font-weight: 700; color: #ffffff;
   }
 
   .progress-bar-wrap { height: 4px; background: rgba(255,255,255,0.1); border-radius: 4px; margin-bottom: 32px; overflow: hidden; }
@@ -275,7 +276,7 @@
   }
   .score-circle .score-num {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    font-size: 36px; font-weight: 800; color: #1a1a1a; line-height: 1;
+    font-size: 36px; font-weight: 800; color: #14304d; line-height: 1;
   }
 
   .result-tick-cross { font-size: 72px; line-height: 1; }
@@ -293,7 +294,10 @@
     font-size: 15px; color: #333; margin-bottom: 10px; line-height: 1.5;
     font-weight: 400; text-align: center;
   }
-  .result-msg strong { font-weight: 700; }
+  .result-msg strong {
+    font-weight: 700;
+    color: #14304d;
+  }
 
   .result-submsg {
     font-size: 13px; color: #555; margin-bottom: 0; line-height: 1.5;
@@ -366,31 +370,42 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
+  /* ── POWERED BY FOOTER ── */
+  .powered-footer {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    padding: 18px 24px;
+    border-top: 1px solid rgba(255,255,255,0.12);
+    background: rgba(0,0,0,0.15);
+  }
+  .powered-footer span {
+    font-size: 11px; font-weight: 600; letter-spacing: 1.5px;
+    text-transform: uppercase; color: rgba(255,255,255,0.5);
+  }
+  .powered-footer img {
+    height: 28px; width: auto; object-fit: contain;
+    opacity: 0.85;
+    transition: opacity 0.2s;
+  }
+  .powered-footer img:hover { opacity: 1; }
+
   @media (max-width: 640px) {
     .card { padding: 26px 18px; }
     header { padding: 0 16px; }
     .result-breakdown { grid-template-columns: repeat(3,1fr); gap: 8px; }
     .card-title { font-size: 26px; }
     .breakdown-item .num { font-size: 26px; }
+    .header-text h1 { font-size: 13px; letter-spacing: 0.5px; }
+    .header-badge { display: none; }
   }
-  @media (max-width: 640px) {
-    .header-text h1 {
-        font-size: 13px;
-        letter-spacing: 0.5px;
-    }
-    .header-badge {
-        display: none;
-    }
-}
 </style>
 </head>
 <body>
 <div class="page">
   <header>
-    <div class="logo-hex">GEM</div>
+    <img src="imgs/GEMS 20 Years Logo Black.png" alt="GEMS Logo" class="logo-img">
     <div class="header-text">
-      <h1>GEMS – Concept Clarification Series</h1>
-      
+      <h1>CONCEPT CLARIFICATION SERIES</h1>
     </div>
     <div class="header-badge">Episode 1</div>
   </header>
@@ -542,6 +557,12 @@
 
   </div>
 </div>
+
+<!-- ── POWERED BY FOOTER ── -->
+<footer class="powered-footer">
+  <span>Powered By</span>
+  <img src="imgs/montso Solutiobs.png" alt="Montso Solutions">
+</footer>
 
 <div class="toast" id="toast"></div>
 
@@ -861,7 +882,6 @@ function downloadPDF() {
   });
   curY += 28;
 
-  // ── BANNER (no Unicode icons — jsPDF cannot render them) ──
   const bannerLabel = passed ? 'PASSED' : 'NOT PASSED';
   const bannerText  = passed
     ? 'Congratulations! You met the required 70% pass mark.'
@@ -876,14 +896,12 @@ function downloadPDF() {
   doc.setLineWidth(0.5);
   doc.roundedRect(M, curY, INNER, bannerH, 3, 3, 'FD');
 
-  // Coloured left accent bar
   setFill(passed ? C.success : C.danger);
   doc.roundedRect(M, curY, 4, bannerH, 2, 2, 'F');
 
   setTxt(passed ? C.success : C.danger);
   doc.setFontSize(10); doc.setFont('helvetica','bold');
 
-  // Centre all lines vertically inside the banner
   const lineH = 6;
   const totalTextH = bannerLines.length * lineH;
   const textStartY = curY + (bannerH - totalTextH) / 2 + lineH - 1;
@@ -893,7 +911,6 @@ function downloadPDF() {
   });
 
   curY += bannerH + 8;
-  // ── END BANNER ──
 
   setTxt(C.textDk); doc.setFontSize(11); doc.setFont('helvetica','bold');
   doc.text('Question Review', M, curY);
@@ -954,7 +971,6 @@ function downloadPDF() {
     setTxt(C.muted); doc.setFontSize(7.5); doc.setFont('helvetica','bold');
     doc.text('YOUR ANSWER:', M+7, qy);
     qy += 4.5;
-    // Use plain [Y] / [N] prefix instead of Unicode tick/cross
     const uaPrefix = isOk ? '[Y] ' : '[N] ';
     setTxt(isOk ? C.success : C.danger); doc.setFontSize(9); doc.setFont('helvetica','normal');
     const uaWrapped = splitText(uaPrefix + userAnswer, 9, INNER - 20);
