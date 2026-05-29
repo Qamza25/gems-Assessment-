@@ -200,8 +200,9 @@
     font-size: 19px; font-weight: 700; color: #ffffff;
   }
 
-  .progress-bar-wrap { height: 4px; background: rgba(255,255,255,0.1); border-radius: 4px; margin-bottom: 32px; overflow: hidden; }
-  .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--navy), var(--gold)); border-radius: 4px; transition: width 0.4s cubic-bezier(.4,0,.2,1); }
+  /* FIX 1: Progress bar track is green, filled portion is white */
+  .progress-bar-wrap { height: 4px; background: rgba(255,255,255,0.2); border-radius: 4px; margin-bottom: 32px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; background: #ffffff; border-radius: 4px; transition: width 0.4s cubic-bezier(.4,0,.2,1); }
 
   .section-header {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -347,9 +348,10 @@
     border: 1px solid rgba(217,48,37,0.28);
     border-radius: 12px; padding: 18px 20px; margin-bottom: 16px;
   }
+  /* FIX 2: "Below Pass Mark" title is now white */
   .retry-box .retry-title {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    font-size: 15px; font-weight: 700; color: var(--danger); margin-bottom: 6px;
+    font-size: 15px; font-weight: 700; color: #ffffff; margin-bottom: 6px;
   }
 
   .toast {
