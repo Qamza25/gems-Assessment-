@@ -356,7 +356,7 @@
 
   .toast {
     position: fixed; bottom: 28px; right: 28px;
-    background: var(--teal-dark); border: 1px solid var(--border);
+    background: var(--dark); border: 1px solid var(--border);
     border-radius: 10px; padding: 13px 18px; font-size: 14px; color: var(--white);
     z-index: 9999; transform: translateY(60px); opacity: 0; transition: all 0.3s;
     max-width: 300px;
@@ -378,15 +378,15 @@
     display: flex; align-items: center; justify-content: center; gap: 10px;
     padding: 18px 24px;
     border-top: 1px solid rgba(255,255,255,0.12);
-    background: rgba(0,0,0,0.15);
+    background: #0d6b5e;
   }
   .powered-footer span {
     font-size: 11px; font-weight: 600; letter-spacing: 1.5px;
     text-transform: uppercase; color: rgba(255,255,255,0.5);
   }
   .powered-footer img {
-    height: 28px; width: auto; object-fit: contain;
-    opacity: 0.85;
+    height: 35px; width: auto; object-fit: contain;
+    opacity: 1;
     transition: opacity 0.2s;
   }
   .powered-footer img:hover { opacity: 1; }
@@ -563,14 +563,14 @@
 <!-- ── POWERED BY FOOTER ── -->
 <footer class="powered-footer">
   <span>Powered By</span>
-  <img src="imgs/montso Solutiobs.png" alt="Montso Solutions">
+  <img src="imgs\Montso Solutions.png" alt="Montso Solutions">
 </footer>
 
 <div class="toast" id="toast"></div>
 
 <script>
-const SUPABASE_URL  = 'https://lgbksliquaakgwbsjule.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_RE60s3HAfDcv2vwILEcGxw_NQqh_ydn';
+const SUPABASE_URL      = 'https://zxcpsyzpkehghqnnzjri.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_-r-qBnre3dK0K0MMYLJg3Q_Y4Ztj-em';
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
